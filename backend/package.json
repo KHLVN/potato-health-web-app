@@ -18,7 +18,13 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.18.2",
     "multer": "^2.0.2",
+<<<<<<< HEAD
     "path": "^0.12.7"
+=======
+    "path": "^0.12.7",
+    "react-router-dom": "^7.9.3",
+    "tensorflowjs": "^0.0.1-security"
+>>>>>>> 946b7ef (Updated main branch)
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
