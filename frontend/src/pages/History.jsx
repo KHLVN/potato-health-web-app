@@ -7,10 +7,12 @@ function History() {
   ];
 
   return (
-    <div className="p-6 min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-cover bg-center flex flex-col relative" >
+      {/* Navbar (always visible on top) */}
       <div className="z-50">
         <Navbar />
       </div>
+      
       <h1 className="text-3xl font-bold text-green-700 mb-6">History Logs</h1>
 
       <table className="w-full border border-gray-200">

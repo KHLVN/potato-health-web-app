@@ -7,6 +7,7 @@ import About from "./pages/About";
 import HowItWorks from "./pages/HowItWorks.jsx";
 import ContactUs from "./pages/ContactUs";
 import Settings from "./pages/Settings";
+import History from "./pages/History";
 
 
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/history" element={<History />}/>
         <Route path="/about" element={<About />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/contact-us" element={<ContactUs />} />
