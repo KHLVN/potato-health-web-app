@@ -18,7 +18,7 @@ const ContactUs = () => {
       image: "/sembrero.jpg",
     },
     {
-      name: "Peña, John Kenneth.",
+      name: "Peña, John Kenneth",
       role: "Machine Learning Specialist",
       email: "qjkbpena@tip.edu.ph",
       field: "Data Science",
@@ -34,44 +34,48 @@ const ContactUs = () => {
   ];
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/Background.png')" }}
-    >
+    <div className="min-h-screen flex flex-col items-center text-gray-800 bg-gradient-to-b from-green-50 via-amber-50 to-white relative">
+      {/* Navbar */}
       <Navbar />
-      <div className="flex flex-col items-center justify-center text-center py-20 bg-black/30">
-        <h1 className="text-4xl font-bold text-white mb-8">Meet Our Team</h1>
-        <p className="text-white mb-10 max-w-2x3">
-          We’re a passionate group of Computer Engineering students dedicated to building the
-          <span className="font-semibold text-green-400"> Potato Health Classification System</span>.
-          <p className="text-white mb-10 max-w-2x3"></p>
-          You can reach us directly through our contact details below.
-        </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-10 max-w-6xl">
-          {members.map((member, index) => (
-            <div
-              key={index}
-              className="bg-white/80 rounded-2xl shadow-lg p-6 hover:shadow-xl transition transform hover:scale-105"
-            >
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-32 h-32 object-cover rounded-full mx-auto mb-4 border-4 border-green-300"
-              />
-              <h2 className="text-xl font-bold text-green-700">{member.name}</h2>
-              <p className="text-gray-600">{member.role}</p>
-              <div className="mt-3 text-sm text-gray-800">
-                <p>📧 {member.email}</p>
-                <p>{member.field}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Header Section */}
+      <div className="text-center pt-28 pb-10 px-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-green-700 mb-4">
+          Meet Our <span className="text-amber-600">Team</span>
+        </h1>
+        <p className="max-w-2xl mx-auto text-lg text-gray-700 leading-relaxed">
+          We are a passionate group of Computer Engineering students dedicated to building
+          the <span className="font-semibold text-green-700">Potato Health Classification System</span>.
+          You can reach us directly through the contact details below.
+        </p>
       </div>
+
+      {/* Team Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-10 pb-20 max-w-7xl w-full">
+        {members.map((member, index) => (
+          <div
+            key={index}
+            className="bg-white/80 backdrop-blur-lg border border-green-100 rounded-3xl shadow-2xl p-6 flex flex-col items-center text-center transition-all hover:shadow-green-100/50 hover:-translate-y-2"
+          >
+            <img
+              src={member.image}
+              alt={member.name}
+              className="w-32 h-32 object-cover rounded-full mb-4 border-4 border-green-300 shadow-md"
+            />
+            <h2 className="text-xl font-bold text-green-700">{member.name}</h2>
+            <p className="text-gray-600 mb-2">{member.role}</p>
+            <div className="text-sm text-gray-700 leading-relaxed">
+              <p className="font-medium">📧 {member.email}</p>
+              <p className="italic">{member.field}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Decorative Background */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[url('/Background.png')] bg-cover bg-center opacity-10 -z-10"></div>
     </div>
   );
 };
 
 export default ContactUs;
-

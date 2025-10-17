@@ -18,7 +18,7 @@ export async function uploadImage(req, res) {
 
     // Mock classification (replace with ML model later)
     const mockResult = {
-      disease: "bacterial",   // enum: healthy | fungal | bacterial
+      disease: "fungal",   // enum: healthy | fungal | bacterial
       confidence: 1.00,     // probability_score
       filePath: savedImage.path,
     };

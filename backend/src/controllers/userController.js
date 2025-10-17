@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 // Login users
 exports.loginUser = async (req, res) => {
@@ -42,11 +43,23 @@ exports.getUser = async (req, res) => {
 };
 
 // Create user
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
-    const newUser = new User(req.body);
+    const { name, email, password } = req.body;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ error: "Email already registered" });
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save new user
+    const newUser = new User({ name, email, password: hashedPassword, role: "user" });
     await newUser.save();
-    res.status(201).json(newUser);
+
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
