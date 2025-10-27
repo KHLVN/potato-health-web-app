@@ -10,6 +10,7 @@ import ContactUs from "./pages/ContactUs";
 import Settings from "./pages/Settings";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
+import History from "./pages/History"
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/history" element={<History />} />
       </Routes>
     </Router>
   );

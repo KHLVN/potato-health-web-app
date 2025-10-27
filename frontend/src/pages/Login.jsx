@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingScreen from "./LoadingScreen";
+
 
 function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
 
     if (username.endsWith("@gmail.com") && password.trim() !== "") {
-      setIsLoading(true);
       setTimeout(() => {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userRole", "user");
@@ -23,19 +21,6 @@ function Login() {
       setShowError(true);
     }
   };
-
-  const handleGuestLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userRole", "guest");
-      navigate("/dashboard");
-    }, 2000);
-  };
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white">
@@ -113,18 +98,11 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-green-700 transition-all"
-            >
+              className="w-full bg-amber-500 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-amber-600 transition-all"
+            > 
               Login
             </button>
           </form>
-
-          <button
-            onClick={handleGuestLogin}
-            className="w-full bg-amber-400 text-white mt-4 py-3 rounded-xl font-semibold shadow-md hover:bg-amber-500 transition-all"
-          >
-            Continue as Guest
-          </button>
 
           <p className="text-center mt-6 text-gray-600">
             Don’t have an account?{" "}

@@ -1,22 +1,39 @@
-import express from 'express';
-import appRoutes from "./routes/appRoutes.js";
-import { connectDB } from "../src/config/db.js";
-import dotenv from "dotenv";
+// server.js or app.js
+import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
+import appRoutes from "./routes/appRoutes.js";
 
 dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 5001
+const PORT = process.env.PORT || 5001;
 
+// ✅ Connect MongoDB
 connectDB();
 
+// ✅ Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({ origin: "http://localhost:3000" }));
+// ✅ Allow frontend access
+app.use(
+  cors({
+    origin: "http://localhost:3000", // React app
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 
+// ✅ Routes
 app.use("/api/images", appRoutes);
 
+// ✅ Default route
+app.get("/", (req, res) => {
+  res.send("Backend API running. Use /api/images routes.");
+});
+
+// ✅ Start server
 app.listen(PORT, () => {
-    console.log('Server is running on port:', PORT);
-})
+  console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+});

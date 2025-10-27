@@ -26,8 +26,6 @@ function Dashboard() {
   };
 
   const handleClassify = async () => {
-    if (!image) return alert("Please select an image first.");
-
     const categories = [
       {
         key: "healthy",

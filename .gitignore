@@ -1,3 +1,4 @@
 .env
 backend/uploads/*
-!backend/uploads/
+!backend/oppuploads/
+node_modules

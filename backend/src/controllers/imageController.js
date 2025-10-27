@@ -1,14 +1,15 @@
 import Image from "../models/Image.js";
 import ClassificationResult from "../models/ClassificationResult.js";
+import fs from "fs";
+import axios from "axios";
+import FormData from "form-data";
 
-// Upload & Classify Image
+// Upload & classify image using Flask model
 export async function uploadImage(req, res) {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded." });
-    }
+    if (!req.file) return res.status(400).json({ message: "No image uploaded." });
 
-    // Save image in DB
+    // Save image to DB
     const newImage = new Image({
       filename: req.file.filename,
       path: req.file.path,
@@ -16,35 +17,39 @@ export async function uploadImage(req, res) {
     });
     const savedImage = await newImage.save();
 
-    // Mock classification (replace with ML model later)
-    const mockResult = {
-      disease: "fungal",   // enum: healthy | fungal | bacterial
-      confidence: 1.00,     // probability_score
-      filePath: savedImage.path,
-    };
+    // Send image to Flask model for prediction
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(savedImage.path));
 
-    // Save classification result 
+    const flaskResponse = await axios.post("http://127.0.0.1:2000/predict", formData, {
+      headers: formData.getHeaders(),
+    });
+
+    const { prediction, confidence } = flaskResponse.data;
+    const predictedLabel = prediction.toLowerCase();
+
+    // Save result to DB
     const result = new ClassificationResult({
       image: savedImage._id,
-      disease: mockResult.disease,
-      probability_score: mockResult.confidence,
+      disease: predictedLabel,
+      probability_score: confidence,
     });
     await result.save();
 
-    // Respond with classification + image reference
+    // Return result
     res.status(201).json({
       imageId: savedImage._id,
       filename: savedImage.filename,
-      disease: result.disease,
-      probability_score: result.probability_score,
+      disease: predictedLabel,
+      probability_score: confidence,
     });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err.message, err);
+    console.error("UPLOAD ERROR:", err.message);
     res.status(500).json({ error: "Image upload failed" });
   }
 }
 
-// Get all classification results
+// Get all classification results with linked images
 export async function getResults(req, res) {
   try {
     const results = await ClassificationResult.find()
@@ -52,6 +57,7 @@ export async function getResults(req, res) {
       .sort({ createdAt: -1 });
     res.json(results);
   } catch (err) {
+    console.error("FETCH ERROR:", err.message);
     res.status(500).json({ error: "Failed to fetch results" });
   }
 }

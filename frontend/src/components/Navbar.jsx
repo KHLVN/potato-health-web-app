@@ -44,6 +44,7 @@ function Navbar() {
             { name: "About Us", path: "/about" },
             { name: "How It Works", path: "/how-it-works" },
             { name: "Contact Us", path: "/contact-us" },
+            { name: "History", path: "/history" }
           ].map((item) => {
             const color = getThemeColor(item.path);
             const activeColor =
