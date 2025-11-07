@@ -7,7 +7,8 @@ import FormData from "form-data";
 // Upload & classify image using Flask model
 export async function uploadImage(req, res) {
   try {
-    if (!req.file) return res.status(400).json({ message: "No image uploaded." });
+    if (!req.file)
+      return res.status(400).json({ message: "No image uploaded." });
 
     // Save image to DB
     const newImage = new Image({
@@ -21,7 +22,10 @@ export async function uploadImage(req, res) {
     const formData = new FormData();
     formData.append("file", fs.createReadStream(savedImage.path));
 
-    const flaskResponse = await axios.post("http://127.0.0.1:2000/predict", formData, {
+    // ✅ Dynamically load Flask URL from .env
+    const flaskUrl = process.env.FLASK_API_URL || "http://127.0.0.1:5001";
+
+    const flaskResponse = await axios.post(`${flaskUrl}/predict`, formData, {
       headers: formData.getHeaders(),
     });
 

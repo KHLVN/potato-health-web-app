@@ -1,39 +1,35 @@
-// server.js or app.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import appRoutes from "./routes/appRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// ✅ Connect MongoDB
 connectDB();
 
-// ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Allow frontend access
 app.use(
   cors({
-    origin: "http://localhost:3000", // React app
-    methods: ["GET", "POST"],
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-// ✅ Routes
+// ✅ Attach routes
 app.use("/api/images", appRoutes);
+app.use("/api/users", userRoutes);
 
-// ✅ Default route
 app.get("/", (req, res) => {
-  res.send("Backend API running. Use /api/images routes.");
+  res.send("Backend API running. Use /api/images or /api/users routes.");
 });
 
-// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
 });
