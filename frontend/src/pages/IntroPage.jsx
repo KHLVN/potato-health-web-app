@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import LoadingScreen from "./LoadingScreen";
+
 
 export default function IntroPage() {
   const navigate = useNavigate();
   const [navBg, setNavBg] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +25,19 @@ export default function IntroPage() {
       section.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const handleGuestLogin = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userRole", "guest");
+      navigate("/dashboard");
+    }, 2000);
+  };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="w-full min-h-screen text-gray-800 bg-gradient-to-b from-green-50 via-amber-50 to-white scroll-smooth">
@@ -110,6 +127,13 @@ export default function IntroPage() {
             className="px-6 py-3 bg-amber-500 text-white rounded-full shadow-md hover:bg-amber-600 transition-all"
           >
             Sign Up
+          </button>
+        </div>
+        <div>
+          <button
+            onClick={handleGuestLogin}
+            className="px-6 py-6 underline">
+            Continue as Guest
           </button>
         </div>
       </section>
