@@ -48,15 +48,6 @@ function Login() {
     }
   };
 
-  // const handleGuestLogin = () => {
-  //   setIsLoading(true);
-  //   setTimeout(() => {
-  //     localStorage.setItem("isLoggedIn", "true");
-  //     localStorage.setItem("userRole", "guest");
-  //     navigate("/dashboard");
-  //   }, 2000);
-  // };
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white">
       {/* Navbar */}
