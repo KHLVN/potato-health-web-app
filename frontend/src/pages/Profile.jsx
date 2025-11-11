@@ -15,8 +15,8 @@ function Profile() {
 
   useEffect(() => {
     // Get data from localStorage
-    const storedName = localStorage.getItem("fullName");
-    const storedEmail = localStorage.getItem("email");
+    const storedName = localStorage.getItem("userName");
+    const storedEmail = localStorage.getItem("userEmail");
     const storedMemberSince = localStorage.getItem("memberSince") || "October 2025";
 
     setUserData({
@@ -27,10 +27,6 @@ function Profile() {
       uploads: localStorage.getItem("uploads") || 0,
       lastActivity:
         localStorage.getItem("lastActivity") || "No activity yet.",
-      bio:
-        storedName && storedEmail
-          ? "A proud member of Potato Care™, helping grow healthier crops with AI technology."
-          : "Guest account — explore our features before signing up.",
     });
   }, []);
 
@@ -43,29 +39,26 @@ function Profile() {
       <div className="flex flex-col items-center mt-28 px-6 py-10">
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-10 w-full max-w-4xl border border-green-100">
           {/* Header */}
-          <div className="flex flex-col items-center text-center">
-            <div className="w-32 h-32 flex items-center justify-center rounded-full border-4 border-green-300 bg-green-50 shadow-md mb-4">
-              <User className="w-16 h-16 text-green-700" />
+          {!isGuest && (
+            <div className="flex flex-col items-center text-center">
+              <div className="w-32 h-32 flex items-center justify-center rounded-full border-4 border-green-300 bg-green-50 shadow-md mb-4">
+                <User className="w-16 h-16 text-green-700" />
+              </div>
+              <h1 className="text-3xl font-bold text-green-800">
+                {userData.fullName}
+              </h1>
+              <p className="text-gray-600 mt-1">{userData.email}</p>
+              <p className="text-sm text-amber-700 mt-1 capitalize">
+                Role: {userData.role}
+              </p>
+              <p className="text-gray-500 mt-1">
+                Member Since {userData.memberSince}
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-green-800">
-              {userData.fullName}
-            </h1>
-            <p className="text-gray-600 mt-1">{userData.email}</p>
-            <p className="text-sm text-amber-700 mt-1 capitalize">
-              Role: {userData.role}
-            </p>
-            <p className="text-gray-500 mt-1">
-              Member Since {userData.memberSince}
-            </p>
-          </div>
+          )}
 
           {/* Bio Section */}
           <div className="mt-8 text-center">
-            <h2 className="text-xl font-semibold text-green-700 mb-2">
-              About Me
-            </h2>
-            <p className="text-gray-700">{userData.bio}</p>
-
             {isGuest && (
               <div className="mt-4 bg-amber-100 border border-amber-300 text-amber-800 rounded-xl p-4 shadow-sm">
                 <p className="font-medium">

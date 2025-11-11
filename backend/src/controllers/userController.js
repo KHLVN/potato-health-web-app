@@ -19,9 +19,10 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 3. --- CREATE THE TOKEN (The Missing Part) ---
+    // 3. --- CREATE THE TOKEN ---
     const payload = {
       user: {
+        email: user.email,
         id: user.id, // or user._id
         role: user.role
       },
@@ -42,6 +43,7 @@ export const loginUser = async (req, res) => {
           user: {
             id: user.id,
             name: user.name,
+            email: user.email,
             role: user.role,
           },
         });

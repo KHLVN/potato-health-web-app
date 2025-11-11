@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import LoadingScreen from "./LoadingScreen";
 
-
 export default function IntroPage() {
   const navigate = useNavigate();
   const [navBg, setNavBg] = useState(false);

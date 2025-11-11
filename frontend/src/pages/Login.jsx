@@ -27,8 +27,11 @@ function Login() {
         setShowError(true);
         return;
       }
+
+      console.log(data);
       
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userEmail", data.user.email);
       // store user info locally (adjust as needed)
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId", data.user.id);
