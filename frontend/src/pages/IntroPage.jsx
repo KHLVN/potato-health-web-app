@@ -75,18 +75,6 @@ export default function IntroPage() {
             >
               Features
             </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="px-4 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-all shadow-md"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/signup")}
-              className="px-4 py-2 rounded-full bg-amber-500 text-white hover:bg-amber-600 transition-all shadow-md"
-            >
-              Sign Up
-            </button>
           </div>
         </div>
       </nav>

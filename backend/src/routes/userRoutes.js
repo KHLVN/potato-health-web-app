@@ -12,7 +12,7 @@ const router = express.Router();
 
 // ✅ User routes
 router.post("/login", loginUser);
-router.post("/signup", createUser);
+router.post("/register", createUser);  // Changed from /signup to /register
 router.get("/", getUsers);
 router.get("/:id", getUser);
 router.put("/:id", updateUser);

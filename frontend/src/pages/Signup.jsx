@@ -1,36 +1,61 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingScreen from "./LoadingScreen";
 
 function Signup() {
   const navigate = useNavigate();
-  const [emailPopup, setEmailPopup] = useState(false);
-  const [passwordFocus, setPasswordFocus] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setShowError(false);
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      setShowError(true);
+      return;
+    }
+
     setIsLoading(true);
-    setShowSuccess(true);
-  };
+    try {
+      const res = await fetch("http://localhost:5001/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-  const handleGuestLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userRole", "guest");
-      navigate("/dashboard");
-    }, 2000);
-  };
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMessage(data.error || data.message || "Registration failed");
+        setShowError(true);
+        return;
+      }
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+      setShowSuccess(true);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Connection error. Please try again.");
+      setShowError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white">
-      {/* Navbar (consistent with Intro & Login) */}
-      <nav className="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow-md z-50 transition-all duration-300">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow-md z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
           <div
             className="flex items-center gap-2 cursor-pointer"
@@ -39,7 +64,7 @@ function Signup() {
             <img
               src="potato logo.png"
               alt="Potato Care Logo"
-              className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-300"
+              className="w-10 h-10 object-contain hover:scale-110 transition-transform"
             />
             <h1 className="text-xl md:text-2xl font-extrabold text-green-700">
               Potato Care<span className="text-amber-600">™</span>
@@ -55,7 +80,7 @@ function Signup() {
             </button>
             <button
               onClick={() => navigate("/login")}
-              className="px-4 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-all shadow-md"
+              className="px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-800 transition-all"
             >
               Login
             </button>
@@ -63,74 +88,60 @@ function Signup() {
         </div>
       </nav>
 
-      {/* Signup Form */}
+      {/* Centered Form */}
       <div className="flex flex-grow items-center justify-center mt-20 px-4">
-        <div className="relative bg-white/70 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-green-100">
+        <div className="bg-white/70 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-md border border-green-100">
           <div className="flex flex-col items-center mb-6">
             <h1 className="text-3xl font-bold text-green-800 text-center">
               Create Account
             </h1>
             <p className="text-gray-600 text-center mt-2">
-              Join Potato Care™ and start your smart farming journey.
+              Join Potato Care™ today!
             </p>
           </div>
 
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="w-full mb-4 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 placeholder-gray-500"
-          />
-          <input
-            type="email"
-            placeholder="Email Address"
-            onBlur={(e) => {
-              const email = e.target.value;
-              if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                setEmailPopup(true);
-              }
-            }}
-            onFocus={() => setEmailPopup(false)}
-            className="w-full mb-4 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 placeholder-gray-500"
-          />
-
-          <div className="relative">
+          <form onSubmit={handleSignup} className="space-y-5 mt-6">
+            <input
+              type="text"
+              placeholder="👤 Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
+            <input
+              type="email"
+              placeholder="✉ Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
             <input
               type="password"
-              placeholder="Password"
-              onFocus={() => setPasswordFocus(true)}
-              onBlur={() => setPasswordFocus(false)}
-              className="w-full mb-6 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 placeholder-gray-500"
+              placeholder="✱ Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
             />
-            {/* Password Guide */}
-            {passwordFocus && (
-              <div className="absolute right-[-310px] top-0 bg-white/90 border border-green-200 rounded-2xl shadow-lg p-4 w-72 text-sm text-gray-700 animate-fadeIn z-10">
-                <div className="absolute left-[-8px] top-4 w-0 h-0 border-t-8 border-b-8 border-r-8 border-t-transparent border-b-transparent border-r-green-200"></div>
-                <p className="text-green-700 font-semibold mb-1">
-                  Password Requirements:
-                </p>
-                <ul className="list-disc ml-5 space-y-1">
-                  <li>Must be at least 10 characters</li>
-                  <li>Include a number and symbol (e.g. #, @, !)</li>
-                  <li>Contain uppercase and lowercase letters</li>
-                  <li>Use a strong and secure password</li>
-                </ul>
-              </div>
-            )}
-          </div>
+            <input
+              type="password"
+              placeholder="✱ Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
 
-          <button
-            onClick={handleSignup}
-            className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-green-700 transition-all"
-          >
-            Sign Up
-          </button>
-
-          <button
-            onClick={handleGuestLogin}
-            className="w-full bg-amber-400 text-white mt-4 py-3 rounded-xl font-semibold shadow-md hover:bg-amber-500 transition-all"
-          >
-            Continue as Guest
-          </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-amber-500 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-amber-600 transition-all disabled:opacity-50"
+            >
+              {isLoading ? "Creating Account..." : "Sign Up"}
+            </button>
+          </form>
 
           <p className="text-center mt-6 text-gray-600">
             Already have an account?{" "}
@@ -149,39 +160,28 @@ function Signup() {
         © {new Date().getFullYear()} Potato Care™. All rights reserved.
       </footer>
 
-      {/* 🔹 Email Popup */}
-      {emailPopup && (
+      {/* Success Popup */}
+      {showSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl text-center w-80 animate-fadeIn">
-            <h2 className="text-lg font-semibold text-red-600 mb-3">
-              Use a valid Email Address
+          <div className="bg-white p-8 rounded-2xl shadow-2xl text-center w-80">
+            <h2 className="text-lg font-semibold text-green-600 mb-3">
+              ✓ Account Created Successfully!
             </h2>
-            <button
-              onClick={() => setEmailPopup(false)}
-              className="mt-3 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all"
-            >
-              OK
-            </button>
+            <p className="text-gray-600 text-sm">Redirecting to login...</p>
           </div>
         </div>
       )}
 
-      {/* Success Popup */}
-      {showSuccess && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-2xl text-center w-96 animate-fadeIn">
-            <h2 className="text-xl font-semibold text-green-700 mb-3">
-              Account Successfully Created!
+      {/* Error Popup */}
+      {showError && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl text-center w-80">
+            <h2 className="text-lg font-semibold text-red-600 mb-3">
+              {errorMessage}
             </h2>
-            <p className="text-gray-700 mb-6">
-              Log in now to get started with Potato Care™.
-            </p>
             <button
-              onClick={() => {
-                setShowSuccess(false);
-                navigate("/login");
-              }}
-              className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all"
+              onClick={() => setShowError(false)}
+              className="mt-3 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700"
             >
               OK
             </button>

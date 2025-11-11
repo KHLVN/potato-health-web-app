@@ -1,24 +1,55 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // ✅ Login user
 export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
+    // 1. Find the user
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
+    // 2. Check the password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    res.json({
-      message: "Login successful",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-    });
+    // 3. --- CREATE THE TOKEN (The Missing Part) ---
+    const payload = {
+      user: {
+        id: user.id, // or user._id
+        role: user.role
+      },
+    };
+
+    // 'JWT_SECRET' must be a secret string in your .env file
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }, // Token expires in 1 hour
+      (err, token) => {
+        if (err) throw err;
+
+        // 4. --- SEND THE TOKEN BACK ---
+        res.json({
+          message: "Login successful",
+          token: token, // This is the 'token' your frontend is looking for
+          user: {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+          },
+        });
+      }
+    );
   } catch (err) {
-    console.error("LOGIN ERROR:", err.message);
-    res.status(500).json({ error: "Login failed" });
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 };
 

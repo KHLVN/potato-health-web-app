@@ -1,26 +1,58 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setShowError(false);
+    setIsLoading(true);
 
-    if (username.endsWith("@gmail.com") && password.trim() !== "") {
-      setTimeout(() => {
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userRole", "user");
-        navigate("/dashboard");
-      }, 2000);
-    } else {
+    try {
+      const res = await fetch("http://localhost:5001/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMessage(data.message || data.error || "Login failed");
+        setShowError(true);
+        return;
+      }
+      
+      localStorage.setItem("token", data.token);
+      // store user info locally (adjust as needed)
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("userName", data.user.name);
+      localStorage.setItem("userRole", data.user.role);
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Connection error. Please try again.");
       setShowError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // const handleGuestLogin = () => {
+  //   setIsLoading(true);
+  //   setTimeout(() => {
+  //     localStorage.setItem("isLoggedIn", "true");
+  //     localStorage.setItem("userRole", "guest");
+  //     navigate("/dashboard");
+  //   }, 2000);
+  // };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white">
@@ -72,10 +104,10 @@ function Login() {
 
           <form onSubmit={handleLogin} className="space-y-5 mt-6">
             <input
-              type="text"
+              type="email"
               placeholder="✉ Email Address"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 placeholder-gray-500"
               required
             />
@@ -98,14 +130,15 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full bg-amber-500 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-amber-600 transition-all"
-            > 
-              Login
+              disabled={isLoading}
+              className="w-full bg-amber-500 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-amber-600 transition-all disabled:opacity-50"
+            >
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </form>
 
           <p className="text-center mt-6 text-gray-600">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span
               className="text-green-700 font-bold hover:underline cursor-pointer"
               onClick={() => navigate("/signup")}
@@ -121,12 +154,12 @@ function Login() {
         © {new Date().getFullYear()} Potato Care™. All rights reserved.
       </footer>
 
-      {/* 🔹 Popup Message for Incorrect Login */}
+      {/* Error Popup */}
       {showError && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-8 rounded-2xl shadow-2xl text-center w-80 animate-fadeIn">
             <h2 className="text-lg font-semibold text-red-600 mb-3">
-              Email or Password is Incorrect.
+              {errorMessage}
             </h2>
             <button
               onClick={() => setShowError(false)}
