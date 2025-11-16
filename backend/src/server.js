@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import appRoutes from "./routes/appRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import historyRoutes from "./routes/historyRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ app.use(
 // ✅ Attach routes
 app.use("/api/images", appRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api", historyRoutes); // Add this line
 
 app.get("/", (req, res) => {
   res.send("Backend API running. Use /api/images or /api/users routes.");

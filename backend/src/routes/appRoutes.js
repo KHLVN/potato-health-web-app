@@ -70,10 +70,9 @@ const upload = multer({ storage });
 // ✅ Routes
 router.post(
   "/upload",
-  authMiddleware, // <-- PROTECT THIS ROUTE
+  authMiddleware,
   upload.single("image"),
   (req, res, next) => {
-    // req.user is now available thanks to authMiddleware
     console.log("📸 Multer parsed:", req.file);
     console.log("👤 User identified:", req.user.id); 
     next();
