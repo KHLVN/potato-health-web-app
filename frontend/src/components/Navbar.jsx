@@ -6,22 +6,29 @@ function Navbar() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // ✔ Added: read login + role
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const userRole = localStorage.getItem("userRole") || "guest";
+
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
     navigate("/");
   };
 
   const isActive = (path) => location.pathname === path;
+
   const getThemeColor = (path) => {
     if (path === "/dashboard" || path === "/how-it-works") return "green";
     if (path === "/about" || path === "/contact-us") return "amber";
-    return "green"; 
+    return "green";
   };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow-md z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+
         {/* Left Section: Logo and Title */}
         <div
           className="flex items-center gap-3 cursor-pointer"
@@ -44,7 +51,11 @@ function Navbar() {
             { name: "About Us", path: "/about" },
             { name: "How It Works", path: "/how-it-works" },
             { name: "Contact Us", path: "/contact-us" },
-            { name: "History", path: "/history" }
+
+            // ✔ History only when logged in AND not guest
+            ...(isLoggedIn && userRole !== "guest"
+              ? [{ name: "History", path: "/history" }]
+              : [])
           ].map((item) => {
             const color = getThemeColor(item.path);
             const activeColor =
@@ -80,7 +91,7 @@ function Navbar() {
             );
           })}
 
-          {/* Dropdown Menu Trigger */}
+          {/* Dropdown Menu */}
           <div className="relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -88,6 +99,7 @@ function Navbar() {
             >
               ☰
             </button>
+
             {isMenuOpen && (
               <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-2xl border border-green-200 shadow-2xl overflow-hidden animate-fadeIn">
                 <div className="py-2">
@@ -120,6 +132,7 @@ function Navbar() {
               </div>
             )}
           </div>
+
         </div>
       </div>
     </nav>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar"; 
+import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
@@ -8,6 +8,9 @@ function Dashboard() {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
+  // -------------------------------
+  // IMAGE SELECTION
+  // -------------------------------
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
@@ -19,70 +22,104 @@ function Dashboard() {
     }
   };
 
+  // -------------------------------
+  // LOGOUT
+  // -------------------------------
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("token");
     navigate("/");
   };
 
+  // -------------------------------
+  // CLASSIFY IMAGE  (GUESTS ALLOWED)
+  // -------------------------------
   const handleClassify = async () => {
-    const categories = [
-      {
-        key: "healthy",
-        label: "Healthy Potato",
-        description:
-          "The potato appears healthy with smooth skin and no visible signs of infection. This type of potato is safe for consumption and can be used for storage or planting.",
-        suggestions: [
-          "Store in a cool, dry place.",
-          "Avoid direct sunlight.",
-          "Regularly inspect for any sprouting or dark spots.",
-        ],
-      },
-      {
-        key: "fungal",
-        label: "Fungal-Infected Potato",
-        description:
-          "This potato shows signs of fungal infection, such as dark or moldy patches. It can spread rapidly to other potatoes if not isolated.",
-        suggestions: [
-          "Do not consume or store with healthy potatoes.",
-          "Dispose of infected potatoes properly.",
-          "Disinfect the storage area to prevent spread.",
-        ],
-      },
-      {
-        key: "bacterial",
-        label: "Bacterial-Infected Potato",
-        description:
-          "This potato is likely suffering from a bacterial infection. Symptoms include soft, wet, and discolored areas with a foul odor.",
-        suggestions: [
-          "Avoid touching other potatoes after handling.",
-          "Clean tools and surfaces used for handling.",
-          "Do not plant infected potatoes; they can contaminate soil.",
-        ],
-      },
-    ];
+    if (!image) return alert("Please upload an image first.");
+
+    const token = localStorage.getItem("token");
+
+    // ✔ Guests classify WITHOUT token
+    // ✔ Logged-in users send token so backend saves their history
+    let headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
     const formData = new FormData();
     formData.append("image", image);
 
-    const res = await fetch("http://localhost:5001/api/images/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch(
+        "http://localhost:5001/api/images/upload",
+        {
+          method: "POST",
+          headers,
+          body: formData,
+        }
+      );
 
-    const data = await res.json(); // e.g., { result: "healthy" }
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Upload error:", error);
+        alert("Classification failed.");
+        return;
+      }
 
-    // Match backend result with category
-    const matched = categories.find(
-      (item) => item.key === data.disease
-    );
+      const data = await response.json();
 
-    setResult(matched || null);
+      const categories = [
+        {
+          key: "healthy",
+          label: "Healthy Potato",
+          description:
+            "The potato appears healthy with smooth skin and no visible signs of infection.",
+          suggestions: [
+            "Store in a cool, dry place.",
+            "Avoid direct sunlight.",
+            "Inspect regularly.",
+          ],
+        },
+        {
+          key: "fungal",
+          label: "Fungal-Infected Potato",
+          description:
+            "This potato shows signs of fungal infection such as moldy or dark patches.",
+          suggestions: [
+            "Do not store with healthy potatoes.",
+            "Dispose immediately.",
+            "Disinfect storage area.",
+          ],
+        },
+        {
+          key: "bacterial",
+          label: "Bacterial-Infected Potato",
+          description:
+            "Symptoms include soft, wet, discolored areas with foul odor.",
+          suggestions: [
+            "Avoid contact with other potatoes.",
+            "Discard properly.",
+            "Clean tools and surfaces.",
+          ],
+        },
+      ];
+
+      const matched = categories.find((c) => c.key === data.disease);
+      setResult(matched || null);
+
+    } catch (err) {
+      console.error(err);
+      alert("Unexpected error occurred.");
+    }
   };
 
-  //  Download report function
+  // -------------------------------
+  // DOWNLOAD REPORT
+  // -------------------------------
   const handleDownloadReport = () => {
     if (!result) return;
+
     const reportContent = `
 Potato Care™ Classification Report
 -----------------------------------
@@ -96,6 +133,7 @@ ${result.suggestions.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 
 Generated by Potato Care™ | ${new Date().toLocaleString()}
     `;
+
     const blob = new Blob([reportContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -105,16 +143,18 @@ Generated by Potato Care™ | ${new Date().toLocaleString()}
     URL.revokeObjectURL(url);
   };
 
+  // -------------------------------
+  // UI RENDER
+  // -------------------------------
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white=">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 via-amber-50 to-white">
 
-      <Navbar />
+      <Navbar onLogout={handleLogout} />
 
       {/* PROMOTION SECTION */}
       <section className="mt-28 px-6 py-16 max-w-7xl mx-auto relative overflow-hidden">
-        {/* Subtle Pattern Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-amber-50 to-white opacity-70"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.4),transparent_70%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3),transparent_70%)]"></div>
 
         <div className="relative z-10">
           <h1 className="text-4xl font-bold text-green-800 text-center mb-10 drop-shadow-sm">
@@ -122,110 +162,37 @@ Generated by Potato Care™ | ${new Date().toLocaleString()}
           </h1>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Video 1 */}
-            <div className="group relative overflow-hidden rounded-3xl shadow-xl bg-white border border-green-100 hover:shadow-2xl transition-all">
-              <video
-                src="/videos/planting.mov"
-                muted
-                loop
-                playsInline
-                className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110"
-                onMouseEnter={(e) => e.target.play()}
-                onMouseLeave={(e) => e.target.pause()}
-              />
-              <div className="p-5 text-center">
-                <h2 className="text-xl font-semibold text-green-700 mb-2">
-                  Planting Potatoes
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  Watch how farmers plant healthy potato seeds with care and
-                  precision to ensure strong and vibrant crops.
-                </p>
-              </div>
-            </div>
-
-            {/* Video 2 */}
-            <div className="group relative overflow-hidden rounded-3xl shadow-xl bg-white border border-green-100 hover:shadow-2xl transition-all">
-              <video
-                src="/videos/harvest.mov"
-                muted
-                loop
-                playsInline
-                className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110"
-                onMouseEnter={(e) => e.target.play()}
-                onMouseLeave={(e) => e.target.pause()}
-              />
-              <div className="p-5 text-center">
-                <h2 className="text-xl font-semibold text-amber-700 mb-2">
-                  Harvest Season
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  Experience the joy of harvest—freshly dug potatoes, rich soil,
-                  and the rewards of sustainable farming.
-                </p>
-              </div>
-            </div>
-
-            {/* Video 3 */}
-            <div className="group relative overflow-hidden rounded-3xl shadow-xl bg-white border border-green-100 hover:shadow-2xl transition-all">
-              <video
-                src="/videos/food.mov"
-                muted
-                loop
-                playsInline
-                className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110"
-                onMouseEnter={(e) => e.target.play()}
-                onMouseLeave={(e) => e.target.pause()}
-              />
-              <div className="p-5 text-center">
-                <h2 className="text-xl font-semibold text-green-700 mb-2">
-                  Enjoying the Harvest
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  From farm to table—see how delicious and nutritious potatoes
-                  bring people together through food.
-                </p>
-              </div>
-            </div>
+            <VideoCard src="/videos/planting.mov" title="Planting Potatoes" color="green" />
+            <VideoCard src="/videos/harvest.mov" title="Harvest Season" color="amber" />
+            <VideoCard src="/videos/food.mov" title="Enjoying the Harvest" color="green" />
           </div>
         </div>
       </section>
 
-      {/* SPACING & INTRO */}
+      {/* INTRO */}
       <div className="text-center mt-20 mb-6 px-6">
         <h2 className="text-3xl font-bold text-green-800">
           Start Uploading Your Potato Image
         </h2>
         <p className="text-gray-700 mt-2 max-w-2xl mx-auto">
-          Our AI-powered model will analyze your potato image to determine its
-          health status. Simply upload and let the system do the work!
+          Our AI-powered model will analyze your potato image to determine its health status.
         </p>
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN LAYOUT */}
       <div className="flex flex-grow items-start justify-center px-6 py-10">
         <div className="flex flex-col md:flex-row gap-8 w-full max-w-7xl">
-          {/* UPLOAD SECTION */}
-          <div className="flex-1 py-20 px-6 md:px-16 bg-green-50 text-center rounded-3xl shadow-2xl p-8 overflow-y-auto border border-amber-100">
-            <h1 className="text-3xl font-bold text-amber-800 mb-4">
-              Upload Potato Image
-            </h1>
-            <p className="text-gray-600 mb-2">
-              Supported formats: <span className="font-semibold">JPEG, PNG, SVG</span>
-            </p>
-            <p className="text-gray-600 mb-6">
-              Upload a potato image to classify its health condition using our
-              AI-based model.
-            </p>
 
-            <div className="border-2 border-dashed border-green-400 rounded-2xl p-6 mb-6 bg-white/60 hover:bg-white/80 transition-all">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full text-sm text-gray-700"
-              />
-            </div>
+          {/* UPLOAD BOX */}
+          <div className="flex-1 py-20 px-6 md:px-16 bg-green-50 text-center rounded-3xl shadow-2xl border border-amber-100">
+            <h1 className="text-3xl font-bold text-amber-800 mb-4">Upload Potato Image</h1>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-4 border border-green-300 rounded-xl bg-white"
+            />
 
             {preview && (
               <div className="mt-6">
@@ -234,61 +201,67 @@ Generated by Potato Care™ | ${new Date().toLocaleString()}
                   alt="Preview"
                   className="rounded-2xl mx-auto w-80 h-80 object-cover shadow-lg border-4 border-green-200"
                 />
-                <p className="text-gray-700 mt-3 font-medium">
-                  {image?.name}
-                </p>
               </div>
             )}
+
             <button
               onClick={handleClassify}
               disabled={!image}
-              className={`mt-8 w-full py-3 rounded-full font-semibold text-white  ${
-                image
-                  ? "bg-amber-600 hover:bg-amber-700"
-                  : "bg-gray-400 cursor-not-allowed"
-              } transition-all shadow-md`}
+              className={`mt-8 w-full py-3 rounded-full font-semibold text-white
+                ${image ? "bg-amber-600 hover:bg-amber-700" : "bg-gray-400 cursor-not-allowed"}`}
             >
               Classify Image
             </button>
           </div>
 
-          {/* RESULTS SECTION */}
+          {/* RESULT BOX */}
           <div className="flex-1 bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl p-8 text-center border border-green-100">
-            <h2 className="text-3xl font-bold text-green-800 mb-4 text-center">
-              Classification Result
-            </h2>
+            <h2 className="text-3xl font-bold text-green-800 mb-4">Classification Result</h2>
 
             {!result ? (
-              <p className="text-gray-600 italic text-center mt-10">
-                Upload an image and click "Classify" to see results.
-              </p>
+              <p className="text-gray-600 italic mt-10">Upload an image to see results.</p>
             ) : (
               <div className="animate-fadeIn">
-                <h3 className="text-2xl font-semibold text-green-700 mb-3">
-                  {result.label}
-                </h3>
+                <h3 className="text-2xl font-semibold text-green-700 mb-3">{result.label}</h3>
                 <p className="text-gray-700 mb-6">{result.description}</p>
 
-                <h4 className="text-lg font-semibold text-green-800 mb-2">
-                  Recommended Actions:
-                </h4>
+                <h4 className="text-lg font-semibold text-green-800 mb-2">Recommended Actions:</h4>
                 <ul className="list-disc list-inside text-gray-700 text-left space-y-2">
                   {result.suggestions.map((tip, idx) => (
                     <li key={idx}>{tip}</li>
                   ))}
                 </ul>
 
-                {/* Download Report Button */}
                 <button
                   onClick={handleDownloadReport}
-                  className="mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-full hover:bg-green-700 shadow-md transition-all"
+                  className="mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-full hover:bg-green-700"
                 >
                   ⬇ Download Report
                 </button>
               </div>
             )}
           </div>
+
         </div>
+      </div>
+    </div>
+  );
+}
+
+function VideoCard({ src, title, color }) {
+  return (
+    <div className="group relative overflow-hidden rounded-3xl shadow-xl bg-white border border-green-100 hover:shadow-2xl transition-all">
+      <video
+        src={src}
+        muted
+        loop
+        playsInline
+        className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-110"
+        onMouseEnter={(e) => e.target.play()}
+        onMouseLeave={(e) => e.target.pause()}
+      />
+      <div className="p-5 text-center">
+        <h2 className={`text-xl font-semibold text-${color}-700 mb-2`}>{title}</h2>
       </div>
     </div>
   );
