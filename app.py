@@ -1,4 +1,8 @@
-# app.py
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # suppress TensorFlow warnings
+import tensorflow as tf
+tf.get_logger().setLevel('ERROR')  # suppress TensorFlow logs
+
 from flask import Flask, request, jsonify
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
@@ -37,4 +41,3 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True, port=2000)
-
