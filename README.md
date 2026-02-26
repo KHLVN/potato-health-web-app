@@ -1,8 +1,23 @@
-# Potato Care: Deep Learning-based Potato Health Classification
-This project focuses on using a deep learning technique such as convolutional neural network (VGG-16) to automatically classify the health condition of potatoes based on image data. A camera captures potato images, which are then processed by a trained neural network based in VGG-16 architecture to identify whether a potato is healthy, bacterial-infected, or fungal-infected. The system aims to improve accuracy, consistency, and speed compared to manual inspection, supporting efficient agricultural sorting and quality control.
+# 🥔 Potato Care: Web Application for Deep Learning-Based Potato Health Classification
+This project presents a web application designed to utilize the deep learning model trained for classifying potato health between three categories: Healthy, Bacterial-Infected, Fungal-Infected
 
-### Team Members:
-- Nicolas
-- Pena
-- Roldan
-- Sembrero
+## 📦 Technologies:
+- MongoDB
+- Mongoose
+- Express
+- React.js
+- Node.js
+- cors
+- Vite
+- Tailwind CSS
+- PostCSS
+
+## 📲 Feature:
+- Upload Image (JPEG, PNG, WebP, etc.)
+- Provide Recommendation for classified potato.
+- User Login and Sign-Up (To save classification results).
+
+## 🔃 Process:
+1. The user must log in to proceed, or register if they haven't created their account yet.
+2. Upload an image of Potato on both sides. (must be supported format).
+3. Click the "Classify Image" button to start the process, the results should display instantly.
